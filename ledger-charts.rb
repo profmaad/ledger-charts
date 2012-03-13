@@ -1,0 +1,28 @@
+require 'rubygems'
+require 'json'
+
+require 'sinatra'
+
+if development?
+  require 'sinatra/reloader'
+
+  settings.bind = "127.0.0.1"
+  settings.port = "4568"
+end
+
+VERSION = "0.0"
+
+LEDGER_REST = "http://localhost:4567"
+
+get '/' do
+  @reports = {}
+  @report_name = "Index"
+  haml :index
+end
+
+get '/:report' do
+  
+end
+
+helpers do
+end

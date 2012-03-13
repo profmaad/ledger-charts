@@ -1,9 +1,9 @@
 !!! Strict
 %html
   %head
-    %title Test Page
+    %title= "Ledger Charts ::: #{@report_name}"
     %link{:rel => "stylesheet", :type => "text/css", :href => "/css/bootstrap.css"}
-    %link{:rel => "stylesheet", :type => "text/css", :href => "/css/bootstrap-responsive.css"}
+    %link{:rel => "stylesheet", :type => "text/css", :href => "/cssz/bootstrap-responsive.css"}
     %link{:rel => "stylesheet", :type => "text/css", :href => "/css/ledger-charts.css"}
     %script{:type => "text/javascript", :src => "/js/jquery-1.7.1.min.js"}
     %script{:type => "text/javascript", :src => "/js/highcharts.js"}
@@ -12,11 +12,8 @@
     .navbar.navbar-fixed-top
       .navbar-inner
         .container
-          %a.brand{:href => "#"} Ledger Charts
+          %a.brand{:href => "/"} Ledger Charts
           %ul.nav
-            %li.active
-              %a{:href => "#"} Cashflow
+            = haml :'navbar-content'
     .container
-      .row
-        .span8.offset2
-          #chart-canvas
+      = yield
