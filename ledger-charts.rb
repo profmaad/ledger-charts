@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'rubygems'
 require 'json'
 require 'haml'
@@ -14,7 +15,9 @@ class LedgerCharts < Sinatra::Base
 
   VERSION = "0.0"
 
-  LEDGER_REST = "http://127.0.0.1:9292/rest"
+  LEDGER_REST_URI = "http://127.0.0.1:9292/rest" # HC
+
+  set :ledger_rest_uri, LEDGER_REST_URI
 
   #HC
   REPORTS = [ {:name => 'Cashflow', :active => true, :id => "cashflow"} ]
@@ -23,20 +26,29 @@ class LedgerCharts < Sinatra::Base
     :reportType => 'balance',
     :title => 'Cashflow',
     :yTitle => 'Value',
-    :legend => false,
+    :legend => true,
     :timeStep => 'month',
     :timeSpan => {
       :startMonth => 4,
       :startYear => 2010,
       :endMonth => 3,
       :endYear => 2012
-    }
+    },
+    :series => [
+                {
+                  :title => "Impulsausgaben",
+                  :query => "impuls",
+                  :field => "total",
+                  :modifier => "-v",
+                },
+                {
+                  :title => "Einkäufe",
+                  :query => "einkäufe",
+                  :field => "total",
+                  :modifier => "-v",
+                },
+               ],
   }
-
-  get '/js/chart_options.js' do
-    content_type 'text/javascript'
-    erb :'chart_options.js'
-  end
 
   get '/' do
     @reports = REPORTS

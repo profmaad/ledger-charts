@@ -8,15 +8,17 @@ $(document).ready(function()
 
 function createChart(options)
 {
-    var dataFunction;
+    var generalDataFunction;
     var categoriesFunction;
 
     switch(options.timeStep)
     {
     case 'month':
-	dataFunction = function()
+	generalDataFunction = function(series, query, field, modifier)
 	{
-	    return requestData(options.timeSpan.startMonth, options.timeSpan.startYear, options.timeSpan.endMonth, options.timeSpan.endYear);
+	    return function() {
+		return requestData(series, options.reportType, query, field, modifier, options.timeSpan.startMonth, options.timeSpan.startYear, options.timeSpan.endMonth, options.timeSpan.endYear);
+	    };
 	};
 	categoriesFunction = function()
 	{
@@ -26,6 +28,29 @@ function createChart(options)
     case 'default':
 	alert("unknown timeStep: "+options.timeStep);
 	return undefined;
+    }
+
+    var dataFunctions = [];
+
+    var series = [];
+    for( var i in options.series )
+    {
+	series.push( {
+	    name: options.series[i].title,
+	    data: [],
+	});	
+
+	dataFunctions.push( function(index, query, field, modifier) {
+	    return generalDataFunction(index , query, field, modifier);
+	}(i, options.series[i].query, options.series[i].field, new Function("v", "return "+options.series[i].modifier+";"))
+			  );
+    }
+
+    var dataFunction = function() {
+	for( var i in dataFunctions )
+	{
+	    dataFunctions[i]();
+	}
     }
 
     return new Highcharts.Chart(
@@ -53,13 +78,7 @@ function createChart(options)
 	    {
 		enabled: options.legend
 	    },
-	    series: 
-	    [
-		{
-		    name: 'Cashflow', //HC
-		    data: []
-		}
-	    ]
+	    series: series
 	}
     );
 }
@@ -92,40 +111,49 @@ function requestDataForYear(year)
     return requestData(1, year, 12, year);
 }
 
-function requestData(month, year, end_month, end_year)
+function requestData(series, type, query, field, modifier, month, year, end_month, end_year)
 {
     $.ajax(
 	{
 	    type: 'POST',
-	    url: 'http://127.0.0.1:9292/rest/balance', //HC
-	    data: 'query=-p '+year+'/'+month+' impuls', //HC
+	    url: ledgerRestUri+'/'+type,
+	    data: 'query=-p '+year+'/'+month+' '+query,
 	    success: function(msg)
 	    {
 		response = $.parseJSON(msg)
 		if(response)
 		{
-		    var total = 0
-		    if(!response.total)
+		    if(field == 'total')
 		    {
-			for( var account in response.accounts )
+			var total = 0
+			if(!response.total)
 			{
-			    if( typeof(response.accounts[account]) == "string")
+			    for( var account in response.accounts )
 			    {
-				total = getAmount(response.accounts[account]);
-				break;
+				if( typeof(response.accounts[account]) == "string")
+				{
+				    total = getAmount(response.accounts[account]);
+				    break;
+				}
 			    }
 			}
+			else
+			{
+			    total = getAmount(response.total);
+			}
+
+			total = modifier(total);
+
+			chart.series[series].addPoint(total, true);
 		    }
 		    else
 		    {
-			total = getAmount(response.total);
+			alert("unknown field: "+field);
 		    }
-		
-		    chart.series[0].addPoint(total, true); //HC
 		}
 
-		if((year < end_year && month < 12) || (year == end_year && month < end_month)) { requestData(month+1, year, end_month, end_year); }
-		else if (year < end_year && month == 12) { requestData(1, year+1, end_month, end_year); }
+		if((year < end_year && month < 12) || (year == end_year && month < end_month)) { requestData(series, type, query, field, modifier, month+1, year, end_month, end_year); }
+		else if (year < end_year && month == 12) { requestData(series, type, query, field, modifier, 1, year+1, end_month, end_year); }
 	    }
 	}
     );
