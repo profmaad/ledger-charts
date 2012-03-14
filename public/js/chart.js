@@ -1,45 +1,68 @@
-var chartCashflow;
+var chart;
 
-$(document).ready(
-    function()
+$(document).ready(function()
+		  {
+		      chart = createChart(chartOptions);
+		  }
+		 );
+
+function createChart(options)
+{
+    var dataFunction;
+    var categoriesFunction;
+
+    switch(options.timeStep)
     {
-	chartCashflow = new Highcharts.Chart( //HC
-	    {
-		chart:
-		{
-		    renderTo: 'chart-canvas',
-		    type: 'column', //HC
-//		    events: { load: requestDataForCurrentYear }
-		    events: { load: requestData(4, 2010, 3, 2012) } //HC
-		},
-		title:
-		{
-		    text: 'Cashflow' // HC
-		},
-		xAxis:
-		{
-		    categories: generateCategoriesForTimespan(4, 2010, 3, 2012), //HC
-		    labels: { rotation: -45, y: 30 } //HC
-		},
-		yAxis:
-		{
-		    title: { text: 'Value' } //HC
-		},
-		legend:
-		{
-		    enabled: false //HC
-		},
-		series: 
-		[
-		    {
-			name: 'Cashflow', //HC
-			data: []
-		    }
-		]
-	    }
-	);
+    case 'month':
+	dataFunction = function()
+	{
+	    return requestData(options.timeSpan.startMonth, options.timeSpan.startYear, options.timeSpan.endMonth, options.timeSpan.endYear);
+	};
+	categoriesFunction = function()
+	{
+	    return generateCategoriesForTimespan(options.timeSpan.startMonth, options.timeSpan.startYear, options.timeSpan.endMonth, options.timeSpan.endYear);
+	}
+	break;
+    case 'default':
+	alert("unknown timeStep: "+options.timeStep);
+	return undefined;
     }
-);
+
+    return new Highcharts.Chart(
+	{
+	    chart:
+	    {
+		renderTo: 'chart-canvas',
+		type: options.type,
+		events: { load: dataFunction }
+	    },
+	    title:
+	    {
+		text: options.title
+	    },
+	    xAxis:
+	    {
+		categories: categoriesFunction(),
+		labels: { rotation: -45, y: 30 } //HC
+	    },
+	    yAxis:
+	    {
+		title: { text: options.yTitle }
+	    },
+	    legend:
+	    {
+		enabled: options.legend
+	    },
+	    series: 
+	    [
+		{
+		    name: 'Cashflow', //HC
+		    data: []
+		}
+	    ]
+	}
+    );
+}
 
 function generateCategoriesForTimespan(start_month, start_year, end_month, end_year)
 {
@@ -98,7 +121,7 @@ function requestData(month, year, end_month, end_year)
 			total = getAmount(response.total);
 		    }
 		
-		    chartCashflow.series[0].addPoint(total, true); //HC
+		    chart.series[0].addPoint(total, true); //HC
 		}
 
 		if((year < end_year && month < 12) || (year == end_year && month < end_month)) { requestData(month+1, year, end_month, end_year); }
