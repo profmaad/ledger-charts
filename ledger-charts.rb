@@ -18,7 +18,7 @@ class LedgerCharts < Sinatra::Base
     :type => 'column',
     :reportType => 'balance',
     :title => 'Cashflow',
-    :yTitle => 'Value',
+    :yTitle => 'Amount spend',
     :legend => true,
     :timeStep => 'month',
     :timeSpan => {

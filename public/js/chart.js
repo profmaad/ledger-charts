@@ -1,38 +1,24 @@
-var chart;
-
-$(document).ready(function()
-		  {
-		      chart = createChart(chartOptions);
-		  }
-		 );
-
 function createChart(options)
 {
     var generalDataFunction;
-    var categoriesFunction;
+    var dataFunction;
+    var categories;
+    var series;
+    var periods;
+    
+    var result = generateTimePeriods(options.timeStep, options.timeSpan);
+    periods = result[0];
+    categories = result[1];
 
-    switch(options.timeStep)
+    generalDataFunction = function(series, query, field, modifier, periods)
     {
-    case 'month':
-	generalDataFunction = function(series, query, field, modifier)
-	{
-	    return function() {
-		return requestData(series, options.reportType, query, field, modifier, options.timeSpan.startMonth, options.timeSpan.startYear, options.timeSpan.endMonth, options.timeSpan.endYear);
+	return function() {
+	    return requestBalanceData(series, query, field, modifier, periods);
 	    };
-	};
-	categoriesFunction = function()
-	{
-	    return generateCategoriesForTimespan(options.timeSpan.startMonth, options.timeSpan.startYear, options.timeSpan.endMonth, options.timeSpan.endYear);
-	}
-	break;
-    case 'default':
-	alert("unknown timeStep: "+options.timeStep);
-	return undefined;
-    }
-
+    };	
+	
     var dataFunctions = [];
-
-    var series = [];
+    series = [];
     for( var i in options.series )
     {
 	series.push( {
@@ -40,19 +26,24 @@ function createChart(options)
 	    data: [],
 	});	
 
-	dataFunctions.push( function(index, query, field, modifier) {
-	    return generalDataFunction(index , query, field, modifier);
-	}(i, options.series[i].query, options.series[i].field, new Function("v", "return "+options.series[i].modifier+";"))
+	dataFunctions.push( function(index, query, field, modifier, periods) {
+	    return generalDataFunction(index , query, field, modifier, periods);
+	}(i, options.series[i].query, options.series[i].field, new Function("v", "return "+options.series[i].modifier+";"), periods.slice(0))
 			  );
     }
-
-    var dataFunction = function() {
+    
+    dataFunction = function() {
 	for( var i in dataFunctions )
 	{
 	    dataFunctions[i]();
 	}
     }
 
+    return createHighchart(options, series, dataFunction, categories);
+}
+
+function createHighchart(options, series, dataFunction, categories)
+{
     return new Highcharts.Chart(
 	{
 	    chart:
@@ -67,7 +58,7 @@ function createChart(options)
 	    },
 	    xAxis:
 	    {
-		categories: categoriesFunction(),
+		categories: categories,
 		labels: { rotation: -45, y: 30 } //HC
 	    },
 	    yAxis:
@@ -83,41 +74,125 @@ function createChart(options)
     );
 }
 
-function generateCategoriesForTimespan(start_month, start_year, end_month, end_year)
+function generateTimePeriods(timeStep, timeSpan)
 {
-    var categories = []
-    
-    var m = start_month, y = start_year;
+    switch(timeStep)
+    {
+    case 'year':
+	return generateYearPeriods(timeSpan);
+	break;
+    case 'quarter':
+	return generateQuarterPeriods(timeSpan);
+	break;
+    case 'month':
+	return generateMonthPeriods(timeSpan);
+	break;
+    case 'week':
+	return generateWeekPeriods(timeSpan);
+	break;
+    case 'day':
+	return generateDayPeriods(timeSpan);
+	break;
+    default:
+	alert("Unknown time step: "+timeStep);
+	return [undefined, undefined];
+    }
+}
+function generateYearPeriods(timeSpan)
+{
+    var result = []
+
+    for ( var y = timeSpan.startYear; y <= timeSpan.endYear; y++)
+    {
+	result.push(y.toString());
+    }
+
+    return [result,result];
+}
+function generateQuarterPeriods(timeSpan)
+{
+    var periods = [];
+    var categories = [];
+
+    var y = timeSpan.startYear;
+    var q = timeSpan.startQuarter;
 
     while(true)
     {
-	categories.push(m+"/"+y);
-	if((y < end_year && m < 12) || (y == end_year && m < end_month)) { m = m+1; }
-	else if (y < end_year && m == 12) { m = 1; y = y+1; }
-	else if (y >= end_year && m >= end_month) { break; }
+	var startMonth = 1+((q-1)*3);
+	var endMonth = q*3;
+	var endDay;
+	switch(q)
+	{
+	case 1:
+	case 4:
+	    endDay = 31;
+	    break;
+	case 2:
+	case 3:
+	    endDay = 30;
+	    break;
+	}
+
+	periods.push(y+"/"+startMonth+"/01 - "+y+"/"+endMonth+"/"+endDay);
+	categories.push("Q"+q+" "+y);
+	if((y < timeSpan.endYear && q < 4) || (y == timeSpan.endYear && q < timeSpan.endQuarter)) { q++; }
+	else if (y < timeSpan.endYear && q == 4) { q = 1; y++; }
+	else if (y >= timeSpan.endYear && q >= timeSpan.endQuarter) { break; }
     }
 
-    return categories;
+    return [periods,categories];
+}
+function generateMonthPeriods(timeSpan)
+{
+    var periods = [];
+    var categories = [];
+
+    var y = timeSpan.startYear;
+    var m = timeSpan.startMonth;
+
+    while(true)
+    {
+	periods.push(y+"/"+m);
+	categories.push(m+"/"+y);
+	if((y < timeSpan.endYear && m < 12) || (y == timeSpan.endYear && m < timeSpan.endMonth)) { m = m+1; }
+	else if (y < timeSpan.endYear && m == 12) { m = 1; y = y+1; }
+	else if (y >= timeSpan.endYear && m >= timeSpan.endMonth) { break; }
+    }
+
+    return [periods,categories];
 }
 
-function requestDataForCurrentYear()
+function generateWeekPeriods(timeSpan) // I so dont want to implement this!
 {
-    var date = new Date();
-    return requestData(1, date.getFullYear(), date.getMonth()+1, date.getFullYear());
-}
-function requestDataForYear(year)
-{
-    var date = new Date();
-    return requestData(1, year, 12, year);
+    return [[],[]];
 }
 
-function requestData(series, type, query, field, modifier, month, year, end_month, end_year)
+function generateDayPeriods(timeSpan)
+{
+    var periods = [];
+    var categories = [];
+
+    var currentDate = new Date(timeSpan.startYear, timeSpan.startMonth-1, timeSpan.startDay);
+    var endDate = new Date(timeSpan.endYear, timeSpan.endMonth-1, timeSpan.endDay);
+
+    while(currentDate <= endDate)
+    {
+	periods.push(currentDate.getFullYear()+"/"+(currentDate.getMonth()+1)+"/"+currentDate.getDate());
+	categories.push(currentDate.getDate()+"."+(currentDate.getMonth()+1)+"."+currentDate.getFullYear());
+	currentDate.setTime(currentDate.getTime()+86400000);
+    }
+
+    return [periods,categories];
+}
+
+function requestBalanceData(series, query, field, modifier, periods)
 {
     $.ajax(
 	{
 	    type: 'POST',
-	    url: ledgerRestUri+'/'+type,
-	    data: 'query=-p '+year+'/'+month+' '+query,
+	    url: ledgerRestUri+'/balance',
+	    data: 'query=-p "'+periods[0]+'" '+query,
 	    success: function(msg)
 	    {
 		response = $.parseJSON(msg)
@@ -141,9 +216,9 @@ function requestData(series, type, query, field, modifier, month, year, end_mont
 			{
 			    total = getAmount(response.total);
 			}
-
+			
 			total = modifier(total);
-
+			
 			chart.series[series].addPoint(total, true);
 		    }
 		    else
@@ -151,9 +226,12 @@ function requestData(series, type, query, field, modifier, month, year, end_mont
 			alert("unknown field: "+field);
 		    }
 		}
-
-		if((year < end_year && month < 12) || (year == end_year && month < end_month)) { requestData(series, type, query, field, modifier, month+1, year, end_month, end_year); }
-		else if (year < end_year && month == 12) { requestData(series, type, query, field, modifier, 1, year+1, end_month, end_year); }
+		
+		periods.shift();
+		if(!periods.length == 0)
+		{
+		    requestBalanceData(series, query, field, modifier, periods);
+		}
 	    }
 	}
     );

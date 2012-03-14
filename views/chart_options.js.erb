@@ -1,2 +1,10 @@
 var ledgerRestUri = "<%= options.ledger_rest_uri %>";
 var chartOptions = <%= @chart_options.to_json %>;
+
+var chart;
+
+$(document).ready(function()
+		  {
+		      chart = createChart(chartOptions);
+		  }
+		 );
