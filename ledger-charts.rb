@@ -14,16 +14,18 @@ class LedgerCharts < Sinatra::Base
 
   VERSION = "0.0"
 
-  LEDGER_REST = "http://localhost:4567"
+  LEDGER_REST = "http://127.0.0.1:9292/rest"
+
+  REPORTS = [ {:name => 'Cashflow', :active => true, :id => "cashflow"} ]
 
   get '/' do
-    @reports = {}
+    @reports = REPORTS
     @report_name = "Index"
     haml :index
   end
 
   get '/:report' do
-    @reports = {}
+    @reports = REPORTS
     @report_name = "Cashflow"
     haml :report
   end

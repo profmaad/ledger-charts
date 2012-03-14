@@ -2,18 +2,18 @@
 %html
   %head
     %title= "Ledger Charts ::: #{@report_name}"
-    %link{:rel => "stylesheet", :type => "text/css", :href => "/css/bootstrap.css"}
-    //%link{:rel => "stylesheet", :type => "text/css", :href => "/css/bootstrap-responsive.css"}
-    %link{:rel => "stylesheet", :type => "text/css", :href => "/css/ledger-charts.css"}
-    %script{:type => "text/javascript", :src => "/js/jquery-1.7.1.min.js"}
-    %script{:type => "text/javascript", :src => "/js/highcharts.js"}
-    %script{:type => "text/javascript", :src => "/js/chart.js"}
-    %script{:type => "text/javascript", :src => "/js/utility.js"}
+    %link{:rel => "stylesheet", :type => "text/css", :href => url("/css/bootstrap.css")}
+    //%link{:rel => "stylesheet", :type => "text/css", :href => url("/css/bootstrap-responsive.css")}
+    %link{:rel => "stylesheet", :type => "text/css", :href => url("/css/ledger-charts.css")}
+    %script{:type => "text/javascript", :src => url("/js/jquery-1.7.1.min.js")}
+    %script{:type => "text/javascript", :src => url("/js/highcharts.js")}
+    %script{:type => "text/javascript", :src => url("/js/chart.js")}
+    %script{:type => "text/javascript", :src => url("/js/utility.js")}
   %body
     .navbar.navbar-fixed-top
       .navbar-inner
         .container
-          %a.brand{:href => "/"} Ledger Charts
+          %a.brand{:href => url("/")} Ledger Charts
           %ul.nav
             = haml :'navbar-content'
     .container

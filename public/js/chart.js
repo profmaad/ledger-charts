@@ -74,7 +74,7 @@ function requestData(month, year, end_month, end_year)
     $.ajax(
 	{
 	    type: 'POST',
-	    url: 'http://localhost:4567/balance', //HC
+	    url: 'http://127.0.0.1:9292/rest/balance', //HC
 	    data: 'query=-p '+year+'/'+month+' impuls', //HC
 	    success: function(msg)
 	    {
