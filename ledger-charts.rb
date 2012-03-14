@@ -6,13 +6,6 @@ require 'haml'
 require 'sinatra/base'
 
 class LedgerCharts < Sinatra::Base
-  if development?
-    require 'sinatra/reloader'
-
-    settings.bind = "127.0.0.1"
-    settings.port = "4568"
-  end
-
   VERSION = "0.0"
 
   LEDGER_REST_URI = "http://127.0.0.1:9292/rest" # HC
