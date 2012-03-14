@@ -1,51 +1,38 @@
 var chartCashflow;
-var numberRegexp = /^[-0-9.,]*$/
-
-function getAmount(s)
-{
-    var parts = s.split(' ');
-    for( var i in parts)
-    {
-	if(numberRegexp.test(parts[i]))
-	{
-	    return parseFloat(parts[i]);
-	}
-    }
-}
 
 $(document).ready(
     function()
     {
-	chartCashflow = new Highcharts.Chart(
+	chartCashflow = new Highcharts.Chart( //HC
 	    {
 		chart:
 		{
 		    renderTo: 'chart-canvas',
-		    type: 'column',
+		    type: 'column', //HC
 //		    events: { load: requestDataForCurrentYear }
-		    events: { load: requestData(4, 2010, 3, 2012) }
+		    events: { load: requestData(4, 2010, 3, 2012) } //HC
 		},
 		title:
 		{
-		    text: 'Cashflow'
+		    text: 'Cashflow' // HC
 		},
 		xAxis:
 		{
-		    categories: generateCategoriesForTimespan(4, 2010, 3, 2012),
-		    labels: { rotation: -45, y: 30 }
+		    categories: generateCategoriesForTimespan(4, 2010, 3, 2012), //HC
+		    labels: { rotation: -45, y: 30 } //HC
 		},
 		yAxis:
 		{
-		    title: { text: 'Value' }
+		    title: { text: 'Value' } //HC
 		},
 		legend:
 		{
-		    enabled: false
+		    enabled: false //HC
 		},
 		series: 
 		[
 		    {
-			name: 'Cashflow',
+			name: 'Cashflow', //HC
 			data: []
 		    }
 		]
@@ -87,8 +74,8 @@ function requestData(month, year, end_month, end_year)
     $.ajax(
 	{
 	    type: 'POST',
-	    url: '/balance',
-	    data: 'query=-p '+year+'/'+month+' impuls',
+	    url: 'http://localhost:4567/balance', //HC
+	    data: 'query=-p '+year+'/'+month+' impuls', //HC
 	    success: function(msg)
 	    {
 		response = $.parseJSON(msg)
@@ -111,7 +98,7 @@ function requestData(month, year, end_month, end_year)
 			total = getAmount(response.total);
 		    }
 		
-		    chartCashflow.series[0].addPoint(total, true);
+		    chartCashflow.series[0].addPoint(total, true); //HC
 		}
 
 		if((year < end_year && month < 12) || (year == end_year && month < end_month)) { requestData(month+1, year, end_month, end_year); }
