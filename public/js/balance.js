@@ -132,6 +132,10 @@ function requestBalanceData(series, query, field, modifier, periods, account_nam
 			{
 			    chart.series[series].addPoint(total, false);
 			}
+			else
+			{
+			    chart.series[series].addPoint(0, false);
+			}
 		    }
 		    else if(field == 'accounts')
 		    {
@@ -154,6 +158,10 @@ function requestBalanceData(series, query, field, modifier, periods, account_nam
 			if(isFinite(amount))
 			{
 			    chart.series[series].addPoint(amount, false);
+			}
+			else
+			{
+			    chart.series[series].addPoint(0, false);
 			}
 		    }
 		    else

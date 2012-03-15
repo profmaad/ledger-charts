@@ -1,3 +1,3 @@
-- @reports.each do |report|
-  %li{:class => (report[:active]) ? "active":""}
-    %a{:href => url("/#{report[:id]}")}= report[:name]
+- @reports.sort.each do |id, report|
+  %li{:class => (report[:active] ? "active":"")}
+    %a{:href => url("/report/#{id}")}= report[:title]

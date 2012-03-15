@@ -7,125 +7,53 @@ require 'sinatra/base'
 
 class LedgerCharts < Sinatra::Base
   VERSION = "0.0"
+  REPORTS_DIR = "data/reports" # HC
 
   LEDGER_REST_URI = "http://127.0.0.1:9292/rest" # HC
 
   set :ledger_rest_uri, LEDGER_REST_URI
 
-  #HC
-  REPORTS = [ {:name => 'Cashflow', :active => true, :id => "cashflow"} ]
-  CHART_OPTIONS = [
-                   {
-                     :type => 'column',
-                     :reportType => 'balance',
-                     :title => 'Cashflow',
-                     :yTitle => 'Amount spend',
-                     :legend => true,
-                     :stacked => 'percent',
-                     :timeStep => 'month',
-                     :timeSpan => {
-                       :startMonth => 4,
-                       :startYear => 2010,
-                       :endMonth => 3,
-                       :endYear => 2012
-                     },
-                     :series => [
-                                 {
-                                   :title => "Impulsausgaben",
-                                   :query => "impuls",
-                                   :field => "total",
-                                   :modifier => "-value",
-                                 },
-                                 {
-                                   :title => "Einkäufe",
-                                   :query => "einkäufe",
-                                   :field => "total",
-                                   :modifier => "-value",
-                                 },
-                                ],
-                   },
-                   {
-                     :type => 'column',
-                     :reportType => 'balance',
-                     :title => 'Expenses',
-                     :yTitle => 'Amount spend',
-                     :legend => true,
-                     :stacked => true,
-                     :timeStep => 'month',
-                     :timeSpan => {
-                       :startMonth => 4,
-                       :startYear => 2010,
-                       :endMonth => 3,
-                       :endYear => 2012
-                     },
-                     :series => [
-                                 {
-                                   :title => "Umlaufvermögen",
-                                   :query => "impuls einkäufe laufend",
-                                   :field => "accounts",
-                                   :modifier => "-value",
-                                 },
-                                ],
-                   },
-                   {
-                     :type => 'column',
-                     :reportType => 'register',
-                     :title => 'Register Test',
-                     :yTitle => 'Amount',
-                     :legend => true,
-                     :stacked => true,
-                     :timeSpan => {
-                       :startDay => 1,
-                       :startMonth => 4,
-                       :startYear => 2010,
-                       :endDay => 30,
-                       :endMonth => 3,
-                       :endYear => 2012
-                     },
-                     :series => {
-                       :title => "Ausgaben",
-                       :query => "^exp",
-                       :field => "accounts",
-                       :formatter => 'date',
-                     },
-                   },
-                   {
-                     :type => 'column',
-                     :reportType => 'budget',
-                     :title => 'Budgets',
-                     :yTitle => 'Amount spend',
-                     :legend => true,
-                     :timeStep => 'month',
-                     :timeSpan => {
-                       :startMonth => 1,
-                       :startYear => 2012,
-                       :endMonth => 3,
-                       :endYear => 2012
-                     },
-                     :series => [
-                                 {
-                                   :title => "Expenses",
-                                   :query => "food",
-                                   :field => "accounts",
-                                   :modifier => "(value/budget)*100"
-                                 },
-                                ],
-                   },
-                  ]
+  configure do |c|
+    @@reports = {}
+    @@next_id = 0
+    @@last_active = nil
+
+    Dir[REPORTS_DIR+"/*.json"].each do |file|
+      id = File.basename(file).to_i
+      report = JSON.parse(IO.read(file), :symbolize_names => true)
+      
+      report[:active] = false
+      
+      @@reports[id] = report
+      
+      @@next_id = id if (id > @@next_id)
+    end
+
+    @@next_id += 1
+  end
+
+  before do
+    @@reports[@@last_active][:active] = false unless @@last_active.nil?
+  end
 
   get '/' do
-    @reports = REPORTS
+    @reports = @@reports
     @report_name = "Index"
+    @@last_active = nil
+
     haml :index
   end
 
   get '/report/:id' do
-    @reports = REPORTS
-    @chart_options = CHART_OPTIONS[params[:id].to_i]
-    @report_name = @chart_options[:title]
-    haml :report
-  end
+    id = params[:id].to_i
 
-  helpers do
+    @@last_active = id
+    @reports = @@reports
+
+    @reports[id][:active] = true
+    @chart_options = @reports[id]
+    @report_name = @chart_options[:title]
+
+    haml :report
   end
 end
