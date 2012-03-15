@@ -119,10 +119,10 @@ class LedgerCharts < Sinatra::Base
     haml :index
   end
 
-  get '/:report' do
+  get '/report/:id' do
     @reports = REPORTS
-    @report_name = "Cashflow"
-    @chart_options = CHART_OPTIONS[3]
+    @chart_options = CHART_OPTIONS[params[:id].to_i]
+    @report_name = @chart_options[:title]
     haml :report
   end
 

@@ -128,7 +128,7 @@ function requestBalanceData(series, query, field, modifier, periods, account_nam
 			
 			total = modifier(total, total_budget);
 			
-			if(isFinite(amount))
+			if(isFinite(total))
 			{
 			    chart.series[series].addPoint(total, false);
 			}
