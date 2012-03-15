@@ -56,16 +56,17 @@ function getSeries(series_ids, title, account)
     if(!account) { account = "total" }
     else { name = name + " ::: " + account; }
 
-    if(series_ids[account]) { return series_ids[account]; }
-    else
+    if(series_ids[account] == undefined)
     {
 	chart.addSeries( {
 	    name: name,
 	    data: [],
 	});
 	
-	return chart.series.length-1;
+	series_ids[account] = chart.series.length-1;
     }
+
+    return series_ids[account];
 }
 
 function requestBalanceData(title, query, field, modifier, periods, period_index, series_ids, is_budget)
@@ -165,7 +166,7 @@ function requestBalanceData(title, query, field, modifier, periods, period_index
 		}
 		else
 		{
-		    loading_finished_callback();
+		    loading_finished_callback(Object.keys(series_ids).length);
 		}
 	    }
 	}

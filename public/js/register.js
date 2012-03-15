@@ -32,7 +32,7 @@ function requestRegisterData(series_options)
 		    handleRegisterData(response.postings, series_options);
 		}
 
-		loading_finished_callback();
+		loading_finished_callback(chart.series.length);
 	    }
 	}
     );

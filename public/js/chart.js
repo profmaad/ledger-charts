@@ -62,18 +62,18 @@ function createHighchart(options, series, dataFunction, categories)
 	break;
     }
     
-    series_to_load = chart_options.series.length;
+    finished_series = 0;
     var chart = new Highcharts.Chart(chart_options);
     chart.showLoading("Loading data...");
     
     return chart;
 }
 
-var series_to_load;
-function loading_finished_callback()
+var finished_series;
+function loading_finished_callback(num_series)
 {
-    series_to_load--;
-    if(series_to_load <= 0)
+    finished_series += num_series;
+    if(finished_series >= chart.series.length)
     {
 	chart.redraw();
 	chart.hideLoading();
