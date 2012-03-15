@@ -34,13 +34,13 @@ class LedgerCharts < Sinatra::Base
                                    :title => "Impulsausgaben",
                                    :query => "impuls",
                                    :field => "total",
-                                   :modifier => "-v",
+                                   :modifier => "-value",
                                  },
                                  {
                                    :title => "Einkäufe",
                                    :query => "einkäufe",
                                    :field => "total",
-                                   :modifier => "-v",
+                                   :modifier => "-value",
                                  },
                                 ],
                    },
@@ -63,7 +63,7 @@ class LedgerCharts < Sinatra::Base
                                    :title => "Umlaufvermögen",
                                    :query => "impuls einkäufe laufend",
                                    :field => "accounts",
-                                   :modifier => "-v",
+                                   :modifier => "-value",
                                  },
                                 ],
                    },
@@ -89,6 +89,28 @@ class LedgerCharts < Sinatra::Base
                        :formatter => 'date',
                      },
                    },
+                   {
+                     :type => 'column',
+                     :reportType => 'budget',
+                     :title => 'Budgets',
+                     :yTitle => 'Amount spend',
+                     :legend => true,
+                     :timeStep => 'month',
+                     :timeSpan => {
+                       :startMonth => 1,
+                       :startYear => 2012,
+                       :endMonth => 3,
+                       :endYear => 2012
+                     },
+                     :series => [
+                                 {
+                                   :title => "Expenses",
+                                   :query => "food",
+                                   :field => "accounts",
+                                   :modifier => "(value/budget)*100"
+                                 },
+                                ],
+                   },
                   ]
 
   get '/' do
@@ -100,7 +122,7 @@ class LedgerCharts < Sinatra::Base
   get '/:report' do
     @reports = REPORTS
     @report_name = "Cashflow"
-    @chart_options = CHART_OPTIONS[2]
+    @chart_options = CHART_OPTIONS[3]
     haml :report
   end
 

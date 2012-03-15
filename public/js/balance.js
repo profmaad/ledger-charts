@@ -1,4 +1,4 @@
-function createBalanceChart(options)
+function createBalanceChart(options, is_budget)
 {
     var generalDataFunction;
     var dataFunction;
@@ -10,10 +10,10 @@ function createBalanceChart(options)
     periods = result[0];
     categories = result[1];
 
-    generalDataFunction = function(series, query, field, modifier, periods, account_name)
+    generalDataFunction = function(series, query, field, modifier, periods, account_name, is_budget)
     {
 	return function() {
-	    return requestBalanceData(series, query, field, modifier, periods, account_name);
+	    return requestBalanceData(series, query, field, modifier, periods, account_name, is_budget);
 	    };
     };
 
@@ -21,7 +21,7 @@ function createBalanceChart(options)
     series = [];
     for( var i in options.series )
     {
-	var modifier = (options.series[i].modifier ? new Function("v", "return "+options.series[i].modifier+";") : new Function("v", "return v;") );
+	var modifier = (options.series[i].modifier ? new Function("value", "budget", "return "+options.series[i].modifier+";") : new Function("value", "budget", "return value;") );
 
 	if(options.series[i].field == 'total')
 	{
@@ -30,9 +30,9 @@ function createBalanceChart(options)
 		data: [],
 	    });	
 
-	    dataFunctions.push( function(index, query, field, modifier, periods, account_name) {
-		return generalDataFunction(index , query, field, modifier, periods, account_name);
-	    }(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), undefined)
+	    dataFunctions.push( function(index, query, field, modifier, periods, account_name, is_budget) {
+		return generalDataFunction(index , query, field, modifier, periods, account_name, is_budget);
+	    }(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), undefined, is_budget)
 			      );
 	}
 	else if(options.series[i].field == 'accounts')
@@ -60,9 +60,9 @@ function createBalanceChart(options)
 		    data: [],
 		});
 
-		dataFunctions.push( function(index, query, field, modifier, periods, account_name) {
-		    return generalDataFunction(index , query, field, modifier, periods, account_name);
-		}(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), accounts[a])
+		dataFunctions.push( function(index, query, field, modifier, periods, account_name, is_budget) {
+		    return generalDataFunction(index , query, field, modifier, periods, account_name, is_budget);
+		}(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), accounts[a], is_budget)
 				  );
 	    }
 	}
@@ -83,12 +83,23 @@ function createBalanceChart(options)
     return createHighchart(options, series, dataFunction, categories);
 }
 
-function requestBalanceData(series, query, field, modifier, periods, account_name)
+function getFieldTotal(response, is_budget)
+{
+    if(is_budget) { return response.total_amount; }
+    else { return response.total; }
+}
+function getFieldAmount(account, is_budget)
+{
+    if(is_budget) { return account.amount; }
+    else { return account; }
+}
+
+function requestBalanceData(series, query, field, modifier, periods, account_name, is_budget)
 {
     $.ajax(
 	{
 	    type: 'POST',
-	    url: ledgerRestUri+'/balance',
+	    url: ledgerRestUri+(is_budget ? '/budget' : '/balance'),
 	    data: 'query=-p "'+periods[0]+'" '+query,
 	    success: function(msg)
 	    {
@@ -98,25 +109,29 @@ function requestBalanceData(series, query, field, modifier, periods, account_nam
 		    if(field == 'total')
 		    {
 			var total = 0;
-			if(!response.total)
+			var total_budget = undefined;
+			var total_raw = getFieldTotal(response, is_budget);
+			if(!total_raw)
 			{
 			    for( var account in response.accounts )
 			    {
-				if( typeof(response.accounts[account]) == "string")
-				{
-				    total = getAmount(response.accounts[account]);
-				    break;
-				}
+				total = getAmount(getFieldAmount(response.accounts[account], is_budget));
+				if(is_budget) { total_budget = getAmount(response.accounts[account].budget); }
+				break;
 			    }
 			}
 			else
 			{
-			    total = getAmount(response.total);
+			    total = getAmount(total_raw);
+			    if(is_budget) { total_budget = getAmount(response.total_budget); }
 			}
 			
-			total = modifier(total);
+			total = modifier(total, total_budget);
 			
-			chart.series[series].addPoint(total, false);
+			if(isFinite(amount))
+			{
+			    chart.series[series].addPoint(total, false);
+			}
 		    }
 		    else if(field == 'accounts')
 		    {
@@ -128,13 +143,18 @@ function requestBalanceData(series, query, field, modifier, periods, account_nam
 			}
 
 			var amount = 0;
+			var budget = undefined;
 			if(response.accounts[account_name])
 			{
-			    amount = getAmount(response.accounts[account_name]);
+			    amount = getAmount(getFieldAmount(response.accounts[account_name], is_budget));
+			    if(is_budget) { budget = getAmount(response.accounts[account_name].budget); }
 			}
 
-			amount = modifier(amount);
-			chart.series[series].addPoint(amount, false);
+			amount = modifier(amount, budget);
+			if(isFinite(amount))
+			{
+			    chart.series[series].addPoint(amount, false);
+			}
 		    }
 		    else
 		    {
@@ -147,7 +167,7 @@ function requestBalanceData(series, query, field, modifier, periods, account_nam
 		periods.shift();
 		if(!periods.length == 0)
 		{
-		    requestBalanceData(series, query, field, modifier, periods, account_name);
+		    requestBalanceData(series, query, field, modifier, periods, account_name, is_budget);
 		}
 		else
 		{

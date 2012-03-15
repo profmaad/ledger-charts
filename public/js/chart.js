@@ -3,8 +3,10 @@ function createChart(options)
     switch(options.reportType)
     {
     case 'balance':
-	return createBalanceChart(options);
+	return createBalanceChart(options, false);
 	break;
+    case 'budget':
+	return createBalanceChart(options, true);
     case 'register':
 	return createRegisterChart(options);
     default:
