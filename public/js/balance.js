@@ -10,10 +10,10 @@ function createBalanceChart(options, is_budget)
     periods = result[0];
     categories = result[1];
 
-    generalDataFunction = function(series, query, field, modifier, periods, account_name, is_budget)
+    generalDataFunction = function(title, query, field, modifier, periods, period_index, series_ids, is_budget)
     {
 	return function() {
-	    return requestBalanceData(series, query, field, modifier, periods, account_name, is_budget);
+	    return requestBalanceData(title, query, field, modifier, periods, period_index, series_ids, is_budget);
 	    };
     };
 
@@ -23,54 +23,10 @@ function createBalanceChart(options, is_budget)
     {
 	var modifier = (options.series[i].modifier ? new Function("value", "budget", "return "+options.series[i].modifier+";") : new Function("value", "budget", "return value;") );
 
-	if(options.series[i].field == 'total')
-	{
-	    series.push( {
-		name: options.series[i].title,
-		data: [],
-	    });	
-
-	    dataFunctions.push( function(index, query, field, modifier, periods, account_name, is_budget) {
-		return generalDataFunction(index , query, field, modifier, periods, account_name, is_budget);
-	    }(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), undefined, is_budget)
-			      );
-	}
-	else if(options.series[i].field == 'accounts')
-	{
-	    var accounts_msg = $.ajax(
-		{
-		    type: 'POST',
-		    url: ledgerRestUri+'/accounts',
-		    data: 'query='+options.series[i].query,
-		    async: false,
-		});
-
-	    accounts = $.parseJSON(accounts_msg.responseText);
-	    if(accounts_msg.status != 200 || !accounts)
-	    {
-		alert("Failed to get list of accounts");
-		return undefined;
-	    }
-	    accounts = accounts.accounts;
-	    
-	    for( var a in accounts)
-	    {
-		series.push( {
-		    name: options.series[i].title + " :: " + accounts[a],
-		    data: [],
-		});
-
-		dataFunctions.push( function(index, query, field, modifier, periods, account_name, is_budget) {
-		    return generalDataFunction(index , query, field, modifier, periods, account_name, is_budget);
-		}(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), accounts[a], is_budget)
-				  );
-	    }
-	}
-	else
-	{
-	    alert("unknown field: "+options.series[i].field);
-	    return undefined;
-	}
+	dataFunctions.push( function(title, query, field, modifier, periods, period_index, series_ids, is_budget) {
+	    return generalDataFunction(title , query, field, modifier, periods, period_index, series_ids, is_budget);
+	}(options.title, options.series[i].query, options.series[i].field, modifier, periods, 0, {}, is_budget)
+			  );
     }
     
     dataFunction = function() {
@@ -94,88 +50,118 @@ function getFieldAmount(account, is_budget)
     else { return account; }
 }
 
-function requestBalanceData(series, query, field, modifier, periods, account_name, is_budget)
+function getSeries(series_ids, title, account)
+{
+    var name = title;
+    if(!account) { account = "total" }
+    else { name = name + " ::: " + account; }
+
+    if(series_ids[account]) { return series_ids[account]; }
+    else
+    {
+	chart.addSeries( {
+	    name: name,
+	    data: [],
+	});
+	
+	return chart.series.length-1;
+    }
+}
+
+function requestBalanceData(title, query, field, modifier, periods, period_index, series_ids, is_budget)
 {
     $.ajax(
 	{
 	    type: 'POST',
 	    url: ledgerRestUri+(is_budget ? '/budget' : '/balance'),
-	    data: 'query=-p "'+periods[0]+'" '+query,
+	    data: 'query=-p "'+periods[period_index]+'" '+query,
 	    success: function(msg)
 	    {
 		response = $.parseJSON(msg)
-		if(response)
+		if(!response)
 		{
-		    if(field == 'total')
-		    {
-			var total = 0;
-			var total_budget = undefined;
-			var total_raw = getFieldTotal(response, is_budget);
-			if(!total_raw)
-			{
-			    for( var account in response.accounts )
-			    {
-				total = getAmount(getFieldAmount(response.accounts[account], is_budget));
-				if(is_budget) { total_budget = getAmount(response.accounts[account].budget); }
-				break;
-			    }
-			}
-			else
-			{
-			    total = getAmount(total_raw);
-			    if(is_budget) { total_budget = getAmount(response.total_budget); }
-			}
-			
-			total = modifier(total, total_budget);
-			
-			if(isFinite(total))
-			{
-			    chart.series[series].addPoint(total, false);
-			}
-			else
-			{
-			    chart.series[series].addPoint(0, false);
-			}
-		    }
-		    else if(field == 'accounts')
-		    {
-			if(!response.accounts)
-			{
-			    alert("Received invalid reply from ledger-rest, missing field 'accounts'");
-			    loading_finished_callback();
-			    return undefined;
-			}
+		    alert("Received invalid reply from ledger-rest, not valid JSON");
+		    loading_finished_callback();
+		    return undefined;
+		}
 
-			var amount = 0;
-			var budget = undefined;
-			if(response.accounts[account_name])
+		if(field == 'total')
+		{
+		    var total = 0;
+		    var total_budget = undefined;
+		    var total_raw = getFieldTotal(response, is_budget);
+		    if(!total_raw)
+		    {
+			for( var account in response.accounts )
 			{
-			    amount = getAmount(getFieldAmount(response.accounts[account_name], is_budget));
-			    if(is_budget) { budget = getAmount(response.accounts[account_name].budget); }
-			}
-
-			amount = modifier(amount, budget);
-			if(isFinite(amount))
-			{
-			    chart.series[series].addPoint(amount, false);
-			}
-			else
-			{
-			    chart.series[series].addPoint(0, false);
+			    total = getAmount(getFieldAmount(response.accounts[account], is_budget));
+			    if(is_budget) { total_budget = getAmount(response.accounts[account].budget); }
+			    break;
 			}
 		    }
 		    else
 		    {
-			alert("unknown field: "+field);
+			total = getAmount(total_raw);
+			if(is_budget) { total_budget = getAmount(response.total_budget); }
+		    }
+		    
+		    total = modifier(total, total_budget);
+
+		    var total_series = getSeries(series_ids, title, undefined);
+
+		    if(isFinite(total))
+		    {
+			chart.series[total_series].addPoint([period_index, total], false);
+		    }
+		    else
+		    {
+			chart.series[total_series].addPoint([period_index, 0], false);
+		    }
+		}
+		else if(field == 'accounts')
+		{
+		    if(!response.accounts)
+		    {
+			alert("Received invalid reply from ledger-rest, missing field 'accounts'");
 			loading_finished_callback();
 			return undefined;
 		    }
+
+		    for( var account in response.accounts)
+		    {		    
+			var amount = 0;
+			var budget = undefined;
+			if(response.accounts[account])
+			{
+			    amount = getAmount(getFieldAmount(response.accounts[account], is_budget));
+			    if(is_budget) { budget = getAmount(response.accounts[account].budget); }
+			}
+			
+			amount = modifier(amount, budget);
+
+			var account_series = getSeries(series_ids, title, account);			
+						       
+			if(isFinite(amount))
+			{
+			    chart.series[account_series].addPoint([period_index, amount], false);
+			}
+			else
+			{
+			    chart.series[account_series].addPoint([period_index, 0], false);
+			}
+		    }
+		}
+		else
+		{
+		    alert("unknown field: "+field);
+		    loading_finished_callback();
+		    return undefined;
 		}
 		
-		periods.shift();
-		if(!periods.length == 0)
+		period_index++;
+		if(period_index < periods.length)
 		{
-		    requestBalanceData(series, query, field, modifier, periods, account_name, is_budget);
+		    requestBalanceData(title, query, field, modifier, periods, period_index, series_ids, is_budget);
 		}
 		else
 		{

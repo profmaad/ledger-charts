@@ -24,19 +24,19 @@ function generateTimePeriods(timeStep, timeSpan)
 }
 function generateYearPeriods(timeSpan)
 {
-    var result = []
+    var result = [];
 
     for ( var y = timeSpan.startYear; y <= timeSpan.endYear; y++)
     {
 	result.push(y.toString());
     }
 
-    return [result,result];
+    return [result, result];
 }
 function generateQuarterPeriods(timeSpan)
 {
-    var periods = [];
-    var categories = [];
+    var periods;
+    var categories;
 
     var y = timeSpan.startYear;
     var q = timeSpan.startQuarter;
@@ -65,7 +65,7 @@ function generateQuarterPeriods(timeSpan)
 	else if (y >= timeSpan.endYear && q >= timeSpan.endQuarter) { break; }
     }
 
-    return [periods,categories];
+    return [periods, categories];
 }
 function generateMonthPeriods(timeSpan)
 {
