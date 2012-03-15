@@ -78,7 +78,7 @@ function createBalanceChart(options)
 	{
 	    dataFunctions[i]();
 	}
-    }
+    };
 
     return createHighchart(options, series, dataFunction, categories);
 }

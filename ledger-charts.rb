@@ -61,11 +61,33 @@ class LedgerCharts < Sinatra::Base
                      :series => [
                                  {
                                    :title => "Umlaufvermögen",
-                                   :query => "umlauf",
+                                   :query => "impuls einkäufe laufend",
                                    :field => "accounts",
                                    :modifier => "-v",
                                  },
                                 ],
+                   },
+                   {
+                     :type => 'column',
+                     :reportType => 'register',
+                     :title => 'Register Test',
+                     :yTitle => 'Amount',
+                     :legend => true,
+                     :stacked => true,
+                     :timeSpan => {
+                       :startDay => 1,
+                       :startMonth => 4,
+                       :startYear => 2010,
+                       :endDay => 30,
+                       :endMonth => 3,
+                       :endYear => 2012
+                     },
+                     :series => {
+                       :title => "Ausgaben",
+                       :query => "-P ^exp",
+                       :field => "accounts",
+                       :includeT => true,
+                     },
                    },
                   ]
 
@@ -78,7 +100,7 @@ class LedgerCharts < Sinatra::Base
   get '/:report' do
     @reports = REPORTS
     @report_name = "Cashflow"
-    @chart_options = CHART_OPTIONS[1]
+    @chart_options = CHART_OPTIONS[2]
     haml :report
   end
 

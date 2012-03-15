@@ -5,6 +5,8 @@ function createChart(options)
     case 'balance':
 	return createBalanceChart(options);
 	break;
+    case 'register':
+	return createRegisterChart(options);
     default:
 	alert("unimplemented report type: "+options.reportType);
 	return undefined;
