@@ -45,7 +45,7 @@ function handleRegisterData(postings, series_options)
     var series = {};
     var total_series;
     var categories = [];
-    var by_payee = {};
+    var by_category = {};
 
     var modifier = (series_options.modifier ? new Function("v", "return "+series_options.modifier+";") : new Function("v", "return v;") );
     var formatter = (series_options.formatter ? new Function("date", "value_date", "payee", "return "+series_options.formatter+";") : new Function("date", "value_date", "payee", "return payee;") );
@@ -62,9 +62,10 @@ function handleRegisterData(postings, series_options)
     for( var i in postings )
     {
 	var posting = postings[i];
+	var category = formatter(posting.date, posting.value_date, posting.payee);
 
-	if(!by_payee[posting.payee]) { by_payee[posting.payee] = []; }
-	by_payee[posting.payee].push(posting);
+	if(!by_category[category]) { by_category[category] = []; }
+	by_category[category].push(posting);
 
 	if(series_options.field == "accounts")
 	{	    
@@ -78,12 +79,11 @@ function handleRegisterData(postings, series_options)
 	}
     }
 
-    for( var payee in by_payee )
+    for( var category in by_category )
     {
-	var p = by_payee[payee];
+	var p = by_category[category];
 	if(p.length == 0) { continue; }
 
-	var category = formatter(p[0].date, p[0].value_date, p[0].payee);
 	categories.push(category);
 
 	if(series_options.field == "total")
@@ -101,11 +101,17 @@ function handleRegisterData(postings, series_options)
 	}
 	else if(series_options.field == "accounts")
 	{
-	    for(var i in p )
-	    {		
-		var amount = modifier(getAmount(p[i].amount));
+	    var amounts = {};
 
-		series[p[i].account].data.push([categories.length-1, amount]);
+	    for( var i in p )
+	    {
+		if(!amounts[p[i].account]) { amounts[p[i].account] = 0; }
+		amounts[p[i].account] += getAmount(p[i].amount);
+	    }
+	    
+	    for( var a in amounts )
+	    {		
+		series[a].data.push([categories.length-1, modifier(amounts[a])]);
 	    }
 	}
     }

@@ -84,9 +84,9 @@ class LedgerCharts < Sinatra::Base
                      },
                      :series => {
                        :title => "Ausgaben",
-                       :query => "-P ^exp",
+                       :query => "^exp",
                        :field => "accounts",
-                       :includeT => true,
+                       :formatter => 'date',
                      },
                    },
                   ]
