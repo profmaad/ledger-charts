@@ -20,6 +20,7 @@ class LedgerCharts < Sinatra::Base
     :title => 'Cashflow',
     :yTitle => 'Amount spend',
     :legend => true,
+    :stacked => 'percent',
     :timeStep => 'month',
     :timeSpan => {
       :startMonth => 4,

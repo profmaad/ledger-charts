@@ -75,7 +75,7 @@ function requestBalanceData(series, query, field, modifier, periods)
 			
 			total = modifier(total);
 			
-			chart.series[series].addPoint(total, true);
+			chart.series[series].addPoint(total, false);
 		    }
 		    else
 		    {
@@ -87,6 +87,10 @@ function requestBalanceData(series, query, field, modifier, periods)
 		if(!periods.length == 0)
 		{
 		    requestBalanceData(series, query, field, modifier, periods);
+		}
+		else
+		{
+		    loading_finished_callback();
 		}
 	    }
 	}
