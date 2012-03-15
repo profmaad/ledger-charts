@@ -1,24 +1,32 @@
 # -*- coding: utf-8 -*-
 require 'rubygems'
 require 'json'
+require 'yaml'
 require 'haml'
 
 require 'sinatra/base'
 
 class LedgerCharts < Sinatra::Base
   VERSION = "0.0"
-  REPORTS_DIR = "data/reports" # HC
 
-  LEDGER_REST_URI = "http://127.0.0.1:9292/rest" # HC
+  CONFIG_FILE = "ledger-charts.yml"
 
-  set :ledger_rest_uri, LEDGER_REST_URI
+  set :ledger_rest_uri, "http://127.0.0.1:9292/rest"
+  set :reports_dir, "data/reports"
 
   configure do |c|
+    config = YAML.load_file(CONFIG_FILE)
+    puts "Failed to load config file" if config.nil?
+
+    config.each do |key,value|
+      set key.to_sym, value
+    end
+
     @@reports = {}
     @@next_id = 0
-    @@last_active = nil
+    @@last_active = nil    
 
-    Dir[REPORTS_DIR+"/*.json"].each do |file|
+    Dir[settings.reports_dir+"/*.json"].each do |file|
       id = File.basename(file).to_i
       report = JSON.parse(IO.read(file), :symbolize_names => true)
       
