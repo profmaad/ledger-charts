@@ -10,26 +10,67 @@ function createBalanceChart(options)
     periods = result[0];
     categories = result[1];
 
-    generalDataFunction = function(series, query, field, modifier, periods)
+    generalDataFunction = function(series, query, field, modifier, periods, account_name)
     {
 	return function() {
-	    return requestBalanceData(series, query, field, modifier, periods);
+	    return requestBalanceData(series, query, field, modifier, periods, account_name);
 	    };
-    };	
-	
+    };
+
     var dataFunctions = [];
     series = [];
     for( var i in options.series )
     {
-	series.push( {
-	    name: options.series[i].title,
-	    data: [],
-	});	
+	var modifier = (options.series[i].modifier ? new Function("v", "return "+options.series[i].modifier+";") : new Function("v", "return v;") );
 
-	dataFunctions.push( function(index, query, field, modifier, periods) {
-	    return generalDataFunction(index , query, field, modifier, periods);
-	}(i, options.series[i].query, options.series[i].field, new Function("v", "return "+options.series[i].modifier+";"), periods.slice(0))
-			  );
+	if(options.series[i].field == 'total')
+	{
+	    series.push( {
+		name: options.series[i].title,
+		data: [],
+	    });	
+
+	    dataFunctions.push( function(index, query, field, modifier, periods, account_name) {
+		return generalDataFunction(index , query, field, modifier, periods, account_name);
+	    }(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), undefined)
+			      );
+	}
+	else if(options.series[i].field == 'accounts')
+	{
+	    var accounts_msg = $.ajax(
+		{
+		    type: 'POST',
+		    url: ledgerRestUri+'/accounts',
+		    data: 'query='+options.series[i].query,
+		    async: false,
+		});
+
+	    accounts = $.parseJSON(accounts_msg.responseText);
+	    if(accounts_msg.status != 200 || !accounts)
+	    {
+		alert("Failed to get list of accounts");
+		return undefined;
+	    }
+	    accounts = accounts.accounts;
+	    
+	    for( var a in accounts)
+	    {
+		series.push( {
+		    name: options.series[i].title + " :: " + accounts[a],
+		    data: [],
+		});
+
+		dataFunctions.push( function(index, query, field, modifier, periods, account_name) {
+		    return generalDataFunction(index , query, field, modifier, periods, account_name);
+		}(series.length-1, options.series[i].query, options.series[i].field, modifier, periods.slice(0), accounts[a])
+				  );
+	    }
+	}
+	else
+	{
+	    alert("unknown field: "+options.series[i].field);
+	    return undefined;
+	}
     }
     
     dataFunction = function() {
@@ -42,7 +83,7 @@ function createBalanceChart(options)
     return createHighchart(options, series, dataFunction, categories);
 }
 
-function requestBalanceData(series, query, field, modifier, periods)
+function requestBalanceData(series, query, field, modifier, periods, account_name)
 {
     $.ajax(
 	{
@@ -56,7 +97,7 @@ function requestBalanceData(series, query, field, modifier, periods)
 		{
 		    if(field == 'total')
 		    {
-			var total = 0
+			var total = 0;
 			if(!response.total)
 			{
 			    for( var account in response.accounts )
@@ -77,16 +118,36 @@ function requestBalanceData(series, query, field, modifier, periods)
 			
 			chart.series[series].addPoint(total, false);
 		    }
+		    else if(field == 'accounts')
+		    {
+			if(!response.accounts)
+			{
+			    alert("Received invalid reply from ledger-rest, missing field 'accounts'");
+			    loading_finished_callback();
+			    return undefined;
+			}
+
+			var amount = 0;
+			if(response.accounts[account_name])
+			{
+			    amount = getAmount(response.accounts[account_name]);
+			}
+
+			amount = modifier(amount);
+			chart.series[series].addPoint(amount, false);
+		    }
 		    else
 		    {
 			alert("unknown field: "+field);
+			loading_finished_callback();
+			return undefined;
 		    }
 		}
 		
 		periods.shift();
 		if(!periods.length == 0)
 		{
-		    requestBalanceData(series, query, field, modifier, periods);
+		    requestBalanceData(series, query, field, modifier, periods, account_name);
 		}
 		else
 		{
