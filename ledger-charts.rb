@@ -46,7 +46,6 @@ class LedgerCharts < Sinatra::Base
   end
 
   get '/' do
-    puts "size: #{@reports.size}"
     @report_name = "Index"
     @@last_active = nil
 
