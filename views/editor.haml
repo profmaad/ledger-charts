@@ -1,0 +1,54 @@
+%form.form-horizontal#report-editor
+  %fieldset
+    %legend General settings
+    .control-group
+      %label.control-label{:for => "type"} Chart Type
+      .controls
+        %input{:type => "hidden", :id => "reportType", :name => "reportType", :value => "register"}
+        %select#type{:name => "type"}
+          %option{:value => "column"} Column
+          %option{:value => "bar"} Bar
+          %option{:value => "area"} Area
+          %option{:value => "areaspline"} Area Spline
+          %option{:value => "line"} Line
+          %option{:value => "spline"} Spline
+          %option{:value => "pie"} Pie
+          %option{:value => "scatter"} Scatter plot
+    .control-group
+      %label.control-label{:for => "title"} Report Title
+      .controls
+        %input#title{:type => "text", :name => "title"}
+    .control-group
+      %label.control-label{:for => "yTitle"} Y Axis title
+      .controls
+        %input#yTitle{:type => "text", :name => "yTitle"}
+    .control-group
+      %label.control-label{:for => "legend"} Legend
+      .controls
+        %label.checkbox
+          %input#legend{:type => "checkbox", :value => "true", :name => "legend"}
+          Show legend
+    .control-group
+      %label.control-label{:for => "stacked"} Stacking
+      .controls
+        %select#stacked{:name => "stacked"}
+          %option{:value => "false"} None
+          %option{:value => "normal"} Normal
+          %option{:value => "percent"} Percentage
+    // = haml :'editor-timespan-month'
+    = haml :'editor-series-report'
+    .form-actions
+      %button.btn.btn-primary{:type => "submit"} Save
+      %button.btn{:'data-toggle' => "modal", :href => "#reportTest" } Test
+%script{:type => "text/javascript", :src => url("/js/report-editor.js")}
+
+.modal.hide.fade#reportTest
+  .modal-header
+    %a.close{:'data-dismiss' => "modal"} x
+    %h3 Report test
+  .modal-body
+    %script{:type => "text/javascript"}
+      = erb :'chart_options_test.js'
+    #chart-canvas
+  .modal-footer
+    %a.btn.btn-primary{:href => "#", :'data-dismiss' => "modal"} Close

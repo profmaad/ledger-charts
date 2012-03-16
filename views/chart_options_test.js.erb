@@ -1,0 +1,9 @@
+var ledgerRestUri = "<%= options.ledger_rest_uri %>";
+var chart;
+
+$('#reportTest').on('shown', function()
+{    
+    var chartOptions = $('#report-editor').formParams();
+    
+    chart = createChart(chartOptions);
+});

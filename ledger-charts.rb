@@ -42,21 +42,24 @@ class LedgerCharts < Sinatra::Base
 
   before do
     @@reports[@@last_active][:active] = false unless @@last_active.nil?
+    @reports = @@reports
   end
 
   get '/' do
-    @reports = @@reports
     @report_name = "Index"
     @@last_active = nil
 
     haml :index
   end
 
+  get '/editor' do
+    haml :editor
+  end
+
   get '/report/:id' do
     id = params[:id].to_i
 
     @@last_active = id
-    @reports = @@reports
 
     @reports[id][:active] = true
     @chart_options = @reports[id]

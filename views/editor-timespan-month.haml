@@ -1,0 +1,10 @@
+.control-group
+  %label.control-label{:for => "timeSpan.startMonth"} Start Month
+  .controls
+    %select{:id => "timeSpan.startMonth"}
+      = haml :"editor-select-month"
+.control-group
+  %label.control-label{:for => "timeSpan.startYear"} Start Year
+  .controls
+    %input{:id => "timeSpan.startYear", :type => "text"}
+      
