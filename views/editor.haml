@@ -4,37 +4,39 @@
     .control-group
       %label.control-label{:for => "type"} Chart Type
       .controls
+        - if(@report_id)
+          %input{:type => "hidden", :id => "id", :name => "id", :value => @report_id}
         %input{:type => "hidden", :id => "reportType", :name => "reportType", :value => @report_type}
         %select#type{:name => "type"}
-          %option{:value => "column"} Column
-          %option{:value => "bar"} Bar
-          %option{:value => "area"} Area
-          %option{:value => "areaspline"} Area Spline
-          %option{:value => "line"} Line
-          %option{:value => "spline"} Spline
-          %option{:value => "pie"} Pie
-          %option{:value => "scatter"} Scatter plot
+          %option{:value => "column", :selected => (@report[:type] == "column")} Column
+          %option{:value => "bar", :selected => (@report[:type] == "bar")} Bar
+          %option{:value => "area", :selected => (@report[:type] == "area")} Area
+          %option{:value => "areaspline", :selected => (@report[:type] == "areaspline")} Area Spline
+          %option{:value => "line", :selected => (@report[:type] == "line")} Line
+          %option{:value => "spline", :selected => (@report[:type] == "spline")} Spline
+          %option{:value => "pie", :selected => (@report[:type] == "pie")} Pie
+          %option{:value => "scatter", :selected => (@report[:type] == "scatter")} Scatter plot
     .control-group
       %label.control-label{:for => "title"} Report Title
       .controls
-        %input#title{:type => "text", :name => "title"}
+        %input#title{:type => "text", :name => "title", :value => @report[:title]}
     .control-group
       %label.control-label{:for => "yTitle"} Y Axis title
       .controls
-        %input#yTitle{:type => "text", :name => "yTitle"}
+        %input#yTitle{:type => "text", :name => "yTitle", :value => @report[:yTitle]}
     .control-group
       %label.control-label{:for => "legend"} Legend
       .controls
         %label.checkbox
-          %input#legend{:type => "checkbox", :value => "true", :name => "legend"}
+          %input#legend{:type => "checkbox", :value => "true", :name => "legend", :checked => @report[:legend]}
           Show legend
     .control-group
       %label.control-label{:for => "stacked"} Stacking
       .controls
         %select#stacked{:name => "stacked"}
-          %option{:value => "false"} None
-          %option{:value => "normal"} Normal
-          %option{:value => "percent"} Percentage
+          %option{:value => "false", :selected => (!@report[:stacked])} None
+          %option{:value => "normal", :selected => (@report[:stacked] == "normal")} Normal
+          %option{:value => "percent", :selected => (@report[:stacked] == "percent")} Percentage
     %fieldset
       %legend Data series
       - case @report_type

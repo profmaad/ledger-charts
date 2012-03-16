@@ -55,13 +55,23 @@ class LedgerCharts < Sinatra::Base
   get '/editor/?' do
     haml :'editor-reporttype'
   end
-  get '/editor/:reporttype' do
+  get '/editor/:id' do
+    id = params[:id].to_i
+    redirect url('/') if @@reports[id].nil?
+
+    @report_id = id
+    @report_type = @@reports[id][:reportType]
+    @report = @@reports[id]
+    haml :editor
+  end
+  get '/editor/new_:reporttype' do
     @report_type = params[:reporttype]
     haml :editor
   end
 
   get '/report/:id' do
     id = params[:id].to_i
+    redirect url('/') if @reports[id].nil?
 
     @@last_active = id
 

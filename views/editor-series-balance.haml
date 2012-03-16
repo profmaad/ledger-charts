@@ -6,6 +6,21 @@
       %th Value
       %th Modifier
   %tbody#seriesTableBody
+    - @report[:series].each do |id, series|
+      %tr
+        %td
+          %input{:type => "hidden", :id => "series[#{id}][title]", :name => "series[#{id}][title]", :value => series[:title]}
+          = series[:title]
+        %td
+          %input{:type => "hidden", :id => "series[#{id}][query]", :name => "series[#{id}][query]", :value => series[:query]}
+          = series[:query]
+        %td
+          %input{:type => "hidden", :id => "series[#{id}][field]", :name => "series[#{id}][field]", :value => series[:field]}
+          = series[:field]
+        %td
+          %input{:type => "hidden", :id => "series[#{id}][modifier]", :name => "series[#{id}][modifier]", :value => series[:modifier]}
+          = series[:modifier]
+                
   
 %button#addSeriesButton.btn.pull-right{:'data-toggle' => "modal", :href => "#addSeriesModal"}
   %i.icon-plus

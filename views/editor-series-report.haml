@@ -1,22 +1,22 @@
 .control-group
   %label.control-label{:for => "series.title"} Series Title
   .controls
-    %input{:type => "text", :id => "series.title", :name => "series[title]"}
+    %input{:type => "text", :id => "series.title", :name => "series[title]", :value => @report[:series][:title]}
 .control-group
   %label.control-label{:for => "series.query"} Ledger Query
   .controls
-    %input{:type => "text", :id => "series.query", :placeholder => "^exp and not food", :name => "series[query]"}
+    %input{:type => "text", :id => "series.query", :placeholder => "^exp and not food", :name => "series[query]", :value => @report[:series][:query]}
     %p.help-block You may use any and all options available via the ledger cli, including switches and value expressions. Please do not specify the report type or the period.
 .control-group
   %label.control-label{:for => "series.field"} Value
   .controls
     %select{:id => "series.field", :name => "series[field]"}
-      %option{:value => "total"} Total
-      %option{:value => "accounts"} One Series per Account
+      %option{:value => "total", :selected => (@report[:series][:field] == "total")} Total
+      %option{:value => "accounts", :selected => (@report[:series][:field] == "accounts")} One Series per Account
 .control-group
   %label.control-label{:for => "series.modifier"} Modifier function
   .controls
-    %input{:type => "text", :id => "series.modifier", :placeholder => "value", :name => "series[modifier]"}
+    %input{:type => "text", :id => "series.modifier", :placeholder => "value", :name => "series[modifier]", :value => @report[:series][:modifier]}
     %p
       Specifiy a Javascript expression. This expression is used to calculate the value of a data point. It receives the original value as received by ledger via the
       %code value
@@ -24,7 +24,7 @@
 .control-group
   %label.control-label{:for => "series.formatter"} Formatter function
   .controls
-    %input{:type => "text", :id => "series.formatter", :placeholder => "payee", :name => "series[formatter]"}
+    %input{:type => "text", :id => "series.formatter", :placeholder => "payee", :name => "series[formatter]", :value => @report[:series][:formatter]}
     %p
       Specifiy a Javascript expression. This expression is used to generate the category names. It receives the following parameters:
       %table.table.table-bordered
