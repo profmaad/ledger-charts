@@ -55,6 +55,13 @@ class LedgerCharts < Sinatra::Base
   get '/editor/?' do
     haml :'editor-reporttype'
   end
+  get '/editor/new_:reporttype' do
+    @report_id = nil
+    @report_type = params[:reporttype]
+    @report = {}
+    @report[:series] = {}
+    haml :editor
+  end
   get '/editor/:id' do
     id = params[:id].to_i
     redirect url('/') if @@reports[id].nil?
@@ -62,10 +69,6 @@ class LedgerCharts < Sinatra::Base
     @report_id = id
     @report_type = @@reports[id][:reportType]
     @report = @@reports[id]
-    haml :editor
-  end
-  get '/editor/new_:reporttype' do
-    @report_type = params[:reporttype]
     haml :editor
   end
 
