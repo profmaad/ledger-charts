@@ -52,25 +52,12 @@ class LedgerCharts < Sinatra::Base
     haml :index
   end
 
-  get '/editor' do
+  get '/editor/?' do
     haml :'editor-reporttype'
   end
   get '/editor/:reporttype' do
     @report_type = params[:reporttype]
     haml :editor
-  end
-  post '/editor' do
-    begin
-      reportJSON = URI.unescape(params[:report])
-      id = @@next_id
-      @@next_id += 1
-      @@reports[id] = JSON.parse(reportJSON, :symbolize_names => true)
-      IO.write(settings.reports_dir+"/#{id}.json", JSON.pretty_generate(@@reports[id]))
-
-      return  200
-    rescue Exception => e
-      return [500, e.to_s]
-    end
   end
 
   get '/report/:id' do
@@ -83,5 +70,22 @@ class LedgerCharts < Sinatra::Base
     @report_name = @chart_options[:title]
 
     haml :report
+  end
+  post '/report/?:id?' do
+    begin
+      reportJSON = URI.unescape(params[:report])
+      if params[:id]
+        id = params[:id].to_i
+      else
+        id = @@next_id
+        @@next_id += 1
+      end
+      @@reports[id] = JSON.parse(reportJSON, :symbolize_names => true)
+      IO.write(settings.reports_dir+"/#{id}.json", JSON.pretty_generate(@@reports[id]))
+
+      return  [200, id.to_s]
+    rescue Exception => e
+      return [500, e.to_s]
+    end
   end
 end
