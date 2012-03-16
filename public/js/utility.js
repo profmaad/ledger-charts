@@ -11,3 +11,12 @@ function getAmount(s)
 	}
     }
 }
+
+function deleteReport(id)
+{
+    $.ajax({
+	type: 'DELETE',
+	url: baseURL+'report/'+id,
+	async: false
+    });
+}

@@ -1,3 +1,8 @@
 %script{:type => "text/javascript"}
   = erb :'chart_options.js'
 #chart-canvas
+.row
+  .span1.offset10
+    %a.btn{:href => url("/editor/#{@report_id}")} Edit
+  .span1
+    %a.btn.btn-danger{:href => url("/"), :onclick => "deleteReport(#{@report_id}); return true;"} Delete

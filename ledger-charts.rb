@@ -41,7 +41,7 @@ class LedgerCharts < Sinatra::Base
   end
 
   before do
-    @@reports[@@last_active][:active] = false unless @@last_active.nil?
+    @@reports[@@last_active][:active] = false unless (@@last_active.nil? or @@reports[@@last_active].nil?)
     @reports = @@reports
   end
 
@@ -78,6 +78,7 @@ class LedgerCharts < Sinatra::Base
 
     @@last_active = id
 
+    @report_id = id
     @reports[id][:active] = true
     @chart_options = @reports[id]
     @report_name = @chart_options[:title]
@@ -99,6 +100,17 @@ class LedgerCharts < Sinatra::Base
       return  [200, id.to_s]
     rescue Exception => e
       return [500, e.to_s]
+    end
+  end
+  delete '/report/:id' do
+    id = params[:id].to_i
+    if @@reports[id]
+      @@reports.delete(id)
+      File.delete(settings.reports_dir+"/#{id}.json")
+
+      return 200
+    else 
+      return [404, "No such report"]
     end
   end
 end
