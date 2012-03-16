@@ -1,2 +1,2 @@
 reports_dir: "data/reports"
-ledger_rest_uri: "http://127.0.0.1:9292/rest"
+ledger_rest_uri: "/rest"

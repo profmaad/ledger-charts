@@ -66,7 +66,7 @@ class LedgerCharts < Sinatra::Base
       id = @@next_id
       @@next_id += 1
       @@reports[id] = JSON.parse(reportJSON, :symbolize_names => true)
-      IO.write(settings.reports_dir+"/#{id}.json", reportJSON)
+      IO.write(settings.reports_dir+"/#{id}.json", JSON.pretty_generate(@@reports[id]))
 
       return  200
     rescue Exception => e
