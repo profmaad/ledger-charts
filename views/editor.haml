@@ -4,7 +4,7 @@
     .control-group
       %label.control-label{:for => "type"} Chart Type
       .controls
-        %input{:type => "hidden", :id => "reportType", :name => "reportType", :value => "register"}
+        %input{:type => "hidden", :id => "reportType", :name => "reportType", :value => @report_type}
         %select#type{:name => "type"}
           %option{:value => "column"} Column
           %option{:value => "bar"} Bar
@@ -35,8 +35,13 @@
           %option{:value => "false"} None
           %option{:value => "normal"} Normal
           %option{:value => "percent"} Percentage
-    // = haml :'editor-timespan-month'
-    = haml :'editor-series-report'
+    %fieldset
+      %legend Data series
+      - case @report_type
+      - when 'register'
+        = haml :'editor-series-report'
+      - when 'balance', 'budget'
+        = haml :'editor-series-balance'
     .form-actions
       %button.btn.btn-primary{:type => "submit"} Save
       %button.btn{:'data-toggle' => "modal", :href => "#reportTest" } Test

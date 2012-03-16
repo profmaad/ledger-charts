@@ -1,0 +1,45 @@
+%table.table
+  %thead
+    %tr
+      %th Title
+      %th Query
+      %th Value
+      %th Modifier
+  %tbody#seriesTableBody
+  
+%button#addSeriesButton.btn.pull-right{:'data-toggle' => "modal", :href => "#addSeriesModal"}
+  %i.icon-plus
+
+.modal.hide.fade#addSeriesModal
+  .modal-header
+    %a.close{:'data-dismiss' => "modal"} x
+    %h3 Add data series
+  .modal-body
+    .control-group
+      %label.control-label{:for => "addSeries.title"} Series Title
+      .controls
+        %input{:type => "text", :id => "addSeries.title", :name => "addSeries[title]"}
+    .control-group
+      %label.control-label{:for => "addSeries.query"} Ledger Query
+      .controls
+        %input{:type => "text", :id => "addSeries.query", :placeholder => "^exp and not food", :name => "addSeries[query]"}
+        %p.help-block You may use any and all options available via the ledger cli, including switches and value expressions. Please do not specify the report type or the period.
+    .control-group
+      %label.control-label{:for => "addSeries.field"} Value
+      .controls
+        %select{:id => "addSeries.field", :name => "addSeries[field]"}
+          %option{:value => "total"} Total
+          %option{:value => "accounts"} One Series per Account
+    .control-group
+      %label.control-label{:for => "addSeries.modifier"} Modifier function
+      .controls
+        %input{:type => "text", :id => "addSeries.modifier", :placeholder => "value", :name => "addSeries[modifier]"}
+        %p
+          Specifiy a Javascript expression. This expression is used to calculate the value of a data point. It receives the original value as received by ledger via the
+          %code value
+          parameter.
+  .modal-footer
+    %a.btn{:href => "#", :'data-dismiss' => "modal"} Cancel
+    %a#addSeriesSubmitButton.btn.btn-primary{:href => "#"} Add
+
+%script{:type => "text/javascript", :src => url("/js/report-editor-balance.js")}

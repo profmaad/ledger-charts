@@ -46,6 +46,7 @@ class LedgerCharts < Sinatra::Base
   end
 
   get '/' do
+    puts "size: #{@reports.size}"
     @report_name = "Index"
     @@last_active = nil
 
@@ -53,7 +54,24 @@ class LedgerCharts < Sinatra::Base
   end
 
   get '/editor' do
+    haml :'editor-reporttype'
+  end
+  get '/editor/:reporttype' do
+    @report_type = params[:reporttype]
     haml :editor
+  end
+  post '/editor' do
+    begin
+      reportJSON = URI.unescape(params[:report])
+      id = @@next_id
+      @@next_id += 1
+      @@reports[id] = JSON.parse(reportJSON, :symbolize_names => true)
+      IO.write(settings.reports_dir+"/#{id}.json", reportJSON)
+
+      return  200
+    rescue Exception => e
+      return [500, e.to_s]
+    end
   end
 
   get '/report/:id' do

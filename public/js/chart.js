@@ -1,5 +1,7 @@
 function createChart(options)
 {
+    if(options.timeStep == undefined) { options.timeStep = "month"; }
+    options.timeSpan = completeTimeSpan(options.timeSpan);
     switch(options.reportType)
     {
     case 'balance':

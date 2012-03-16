@@ -25,7 +25,7 @@ function createBalanceChart(options, is_budget)
 
 	dataFunctions.push( function(title, query, field, modifier, periods, period_index, series_ids, is_budget) {
 	    return generalDataFunction(title , query, field, modifier, periods, period_index, series_ids, is_budget);
-	}(options.title, options.series[i].query, options.series[i].field, modifier, periods, 0, {}, is_budget)
+	}(options.series[i].title, options.series[i].query, options.series[i].field, modifier, periods, 0, {}, is_budget)
 			  );
     }
     

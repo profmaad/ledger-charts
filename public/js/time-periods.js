@@ -1,3 +1,40 @@
+function completeTimeSpan(timeSpan)
+{
+    var result = timeSpan;
+    if(result == undefined)
+    {
+	result = {};
+    }
+    if(result.startDay == undefined) { result.startDay = 1; }
+    if(result.startMonth == undefined) { result.startMonth = 1; }
+    if(result.startQuarter == undefined) { result.startQuarter = 1; }
+    if(result.startYear == undefined) { result.startYear = new Date().getFullYear(); }
+
+    var currentDate = new Date();
+    var currentYear = currentDate.getFullYear();
+    var currentMonth = currentDate.getMonth();
+    var currentQuarter = Math.floor(currentMonth/3)+1;
+    var currentDay = currentDate.getDate();
+    if(result.endYear == undefined) { result.endYear = currentYear; }
+    if(result.endQuarter == undefined)
+    {
+	if(result.endYear == currentYear) { result.endQuarter = currentQuarter; }
+	else { result.endQuarter = 4; }
+    }
+    if(result.endMonth == undefined)
+    {
+	if(result.endYear == currentYear) { result.endMonth = currentMonth+1; }
+	else { result.endMonth = 12; }
+    }
+    if(result.endDay == undefined)
+    {
+	if(result.endYear == currentYear && result.endMonth == currentMonth+1) { result.endDay = currentDay; }
+	else { result.endDay = 31; }
+    }
+
+    return result;
+}
+
 function generateTimePeriods(timeStep, timeSpan)
 {
     switch(timeStep)

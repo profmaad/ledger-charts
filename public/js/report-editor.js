@@ -1,11 +1,14 @@
 $('#report-editor').submit( function() {
-    alert(JSON.stringify($(this).formParams(), null, 2));
+    $.ajax({
+	type: 'POST',
+	url: baseURL+'editor',
+	data: "report="+JSON.stringify($(this).formParams()),
+	success: function(msg) {
+	    window.location = baseURL;
+	},
+	error: function(jqXHR, textStatus, errorThrown) {
+	    alert("Error: "+jqXHR.responseText);
+	},
+    });
     return false;
 });
-
-function testForm()
-{
-    var form = $('#report-editor');
-    
-    alert("hi there");
-}

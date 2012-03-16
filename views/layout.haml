@@ -14,6 +14,8 @@
     %script{:type => "text/javascript", :src => url("/js/register.js")}
     %script{:type => "text/javascript", :src => url("/js/utility.js")}
     %script{:type => "text/javascript", :src => url("/js/time-periods.js")}
+    %script{:type => "text/javascript"}
+      = "var baseURL = \"#{url('/')}\";"
   %body
     .navbar.navbar-fixed-top
       .navbar-inner
@@ -21,5 +23,9 @@
           %a.brand{:href => url("/")} Ledger Charts
           %ul.nav
             = haml :'navbar-content'
+          %ul.nav.pull-right
+            %li
+              %a{:href => url("/editor")}
+                %i.icon-plus.icon-white
     .container
       = yield

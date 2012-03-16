@@ -47,7 +47,7 @@ function handleRegisterData(postings, series_options)
     var categories = [];
     var by_category = {};
 
-    var modifier = (series_options.modifier ? new Function("v", "return "+series_options.modifier+";") : new Function("v", "return v;") );
+    var modifier = (series_options.modifier ? new Function("value", "return "+series_options.modifier+";") : new Function("value", "return value;") );
     var formatter = (series_options.formatter ? new Function("date", "value_date", "payee", "return "+series_options.formatter+";") : new Function("date", "value_date", "payee", "return payee;") );
 
     if(series_options.field == "total")
