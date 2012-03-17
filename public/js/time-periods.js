@@ -35,6 +35,61 @@ function completeTimeSpan(timeSpan)
     return result;
 }
 
+function timeSpanToStrings(timeSpan)
+{
+    var start = "";
+    var end = "";
+
+    if(timeSpan.startDay != undefined) { start += timeSpan.startDay+"/"; }
+    if(timeSpan.startMonth != undefined) { start += timeSpan.startMonth+"/"; }
+    if(timeSpan.startYear != undefined) { start += timeSpan.startYear; }
+
+    if(timeSpan.endDay != undefined) { end += timeSpan.endDay+"/"; }
+    if(timeSpan.endMonth != undefined) { end += timeSpan.endMonth+"/"; }
+    if(timeSpan.endYear != undefined) { end += timeSpan.endYear; }
+
+    return [start, end];
+}
+function stringsToTimeSpan(start, end)
+{
+    var timeSpan = {};
+    
+    var matches;
+    if((matches = start.match(/^([0-9]+)\/([0-9]+)\/([0-9]+)$/)) != undefined)
+    {
+	timeSpan.startDay = parseInt(matches[1]);
+	timeSpan.startMonth = parseInt(matches[2]);
+	timeSpan.startYear = parseInt(matches[3]);
+    }
+    else if((matches = start.match(/^([0-9]+)\/([0-9]+)$/)) != undefined)
+    {
+	timeSpan.startMonth = parseInt(matches[1]);
+	timeSpan.startYear = parseInt(matches[2]);
+    }
+    else if((matches = start.match(/^([0-9]+)$/)) != undefined)
+    {
+	timeSpan.startYear = parseInt(matches[1]);
+    }
+
+    if((matches = end.match(/^([0-9]+)\/([0-9]+)\/([0-9]+)$/)) != undefined)
+    {
+	timeSpan.endDay = parseInt(matches[1]);
+	timeSpan.endMonth = parseInt(matches[2]);
+	timeSpan.endYear = parseInt(matches[3]);
+    }
+    else if((matches = end.match(/^([0-9]+)\/([0-9]+)$/)) != undefined)
+    {
+	timeSpan.endMonth = parseInt(matches[1]);
+	timeSpan.endYear = parseInt(matches[2]);
+    }
+    else if((matches = end.match(/^([0-9]+)$/)) != undefined)
+    {
+	timeSpan.endYear = parseInt(matches[1]);
+    }
+
+    return timeSpan;
+}
+
 function generateTimePeriods(timeStep, timeSpan)
 {
     switch(timeStep)

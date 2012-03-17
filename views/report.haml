@@ -2,7 +2,20 @@
   = erb :'chart_options.js'
 #chart-canvas
 .row
-  .span1.offset10
-    %a.btn{:href => url("/editor/#{@report_id}")} Edit
-  .span1
-    %a.btn.btn-danger{:href => url("/"), :onclick => "deleteReport(#{@report_id}); return true;"} Delete
+  .span7.well
+    %form.form-inline#reportControlForm{:style => "margin-bottom: 0px"}
+      %select.input-small{:id => "timeStep", :name => "timeStep"}
+        %option{:value => "year"} Year
+        %option{:value => "quarter"} Quarter
+        %option{:value => "month"} Month
+        %option{:value => "day"} Day
+      %span.help-inline Start date:
+      %input.input-small{:type => "text", :id => "timeSpan.start", :name => "timeSpan[start]"}
+      %span.help-inline End date:
+      %input.input-small{:type => "text", :id => "timeSpan.end", :name => "timeSpan[end]"}
+      %button.btn.btn-primary.pull-right{:type => "submit"} Apply
+  .span2.well.pull-right
+    %a.btn.pull-left{:href => url("/editor/#{@report_id}")} Edit
+    %a.btn.btn-danger.pull-right{:href => url("/"), :onclick => "deleteReport(#{@report_id}); return true;"} Delete
+
+%script{:type => "text/javascript", :src => url("/js/report-control.js")}
