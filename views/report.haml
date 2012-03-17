@@ -4,11 +4,12 @@
 .row
   .span7.well
     %form.form-inline#reportControlForm{:style => "margin-bottom: 0px"}
-      %select.input-small{:id => "timeStep", :name => "timeStep"}
-        %option{:value => "year"} Year
-        %option{:value => "quarter"} Quarter
-        %option{:value => "month"} Month
-        %option{:value => "day"} Day
+      - unless @chart_options[:reportType] == "register"
+        %select.input-small{:id => "timeStep", :name => "timeStep"}
+          %option{:value => "year"} Year
+          %option{:value => "quarter"} Quarter
+          %option{:value => "month"} Month
+          %option{:value => "day"} Day
       %span.help-inline Start date:
       %input.input-small{:type => "text", :id => "timeSpan.start", :name => "timeSpan[start]"}
       %span.help-inline End date:

@@ -11,11 +11,13 @@ function createRegisterChart(options)
 
 function requestRegisterData(series_options)
 {
+    var periodString = timeSpanToLedgerPeriod(chartOptions.timeSpan);
+
     $.ajax(
 	{
 	    type: 'POST',
 	    url: ledgerRestUri+'/register',
-	    data: 'query='+series_options.query,
+	    data: 'query= -p "'+periodString+'" '+series_options.query,
 	    success: function(msg)
 	    {
 		response = $.parseJSON(msg)

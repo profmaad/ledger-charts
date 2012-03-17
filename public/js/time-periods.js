@@ -7,7 +7,7 @@ function completeTimeSpan(timeSpan)
     }
     if(result.startDay == undefined) { result.startDay = 1; }
     if(result.startMonth == undefined) { result.startMonth = 1; }
-    if(result.startQuarter == undefined) { result.startQuarter = 1; }
+    if(result.startQuarter == undefined) { result.startQuarter = Math.floor(result.startMonth/3)+1; }
     if(result.startYear == undefined) { result.startYear = new Date().getFullYear(); }
 
     var currentDate = new Date();
@@ -35,7 +35,7 @@ function completeTimeSpan(timeSpan)
     return result;
 }
 
-function timeSpanToStrings(timeSpan)
+function timeSpanToUserStrings(timeSpan)
 {
     var start = "";
     var end = "";
@@ -49,6 +49,22 @@ function timeSpanToStrings(timeSpan)
     if(timeSpan.endYear != undefined) { end += timeSpan.endYear; }
 
     return [start, end];
+}
+function timeSpanToLedgerPeriod(timeSpan)
+{
+    var result = "";
+
+    if(timeSpan.startYear != undefined) { result += timeSpan.startYear; }
+    if(timeSpan.startMonth != undefined) { result += "/"+timeSpan.startMonth; }
+    if(timeSpan.startDay != undefined) { result += "/"+timeSpan.startDay; }
+
+    result += " - ";
+
+    if(timeSpan.endYear != undefined) { result += timeSpan.endYear; }
+    if(timeSpan.endMonth != undefined) { result += "/"+timeSpan.endMonth; }
+    if(timeSpan.endDay != undefined) { result += "/"+timeSpan.endDay; }
+
+    return result;
 }
 function stringsToTimeSpan(start, end)
 {
@@ -127,8 +143,8 @@ function generateYearPeriods(timeSpan)
 }
 function generateQuarterPeriods(timeSpan)
 {
-    var periods;
-    var categories;
+    var periods = [];
+    var categories = [];
 
     var y = timeSpan.startYear;
     var q = timeSpan.startQuarter;

@@ -8,7 +8,7 @@ function deleteReport(id)
 }
 
 $('#reportControlForm').ready( function() {
-    var timeSpanStrings = timeSpanToStrings(chartOptions.timeSpan);
+    var timeSpanStrings = timeSpanToUserStrings(chartOptions.timeSpan);
 
     $('#timeStep').val(chartOptions.timeStep);
     $('#timeSpan\\.start').val(timeSpanStrings[0]);
@@ -17,9 +17,6 @@ $('#reportControlForm').ready( function() {
 $('#reportControlForm').submit( function() {
     chartOptions.timeStep = $('#timeStep').val();
     chartOptions.timeSpan = completeTimeSpan(stringsToTimeSpan($('#timeSpan\\.start').val(), $('#timeSpan\\.end').val()));
-
-    console.log(chartOptions);
-    console.log(chart);
 
     chart.destroy();
     chart = createChart(chartOptions);
