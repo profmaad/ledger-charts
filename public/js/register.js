@@ -74,7 +74,7 @@ function handleRegisterData(postings, series_options)
 	    if(!series[posting.account])
 	    {
 		series[posting.account] = {
-		    name: series_options.title + " :: "+posting.account,
+		    name: (series_options.title.length == 0) ? posting.account : (series_options.title + " :: "+posting.account),
 		    data: [],
 		};
 	    }

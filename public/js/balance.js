@@ -54,7 +54,11 @@ function getSeries(series_ids, title, account)
 {
     var name = title;
     if(!account) { account = "total" }
-    else { name = name + " ::: " + account; }
+    else
+    {
+	name = (title.length == 0) ? account : (title + " :: "+account);
+
+    }
 
     if(series_ids[account] == undefined)
     {
