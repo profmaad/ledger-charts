@@ -15,7 +15,7 @@ function requestRegisterData(series_options)
 
     $.ajax(
 	{
-	    type: 'POST',
+	    type: 'GET',
 	    url: ledgerRestUri+'/register',
 	    data: 'query= -p "'+periodString+'" '+series_options.query,
 	    success: function(msg)

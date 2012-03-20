@@ -77,7 +77,7 @@ function requestBalanceData(title, query, field, modifier, periods, period_index
 {
     $.ajax(
 	{
-	    type: 'POST',
+	    type: 'GET',
 	    url: ledgerRestUri+(is_budget ? '/budget' : '/balance'),
 	    data: 'query=-p "'+periods[period_index]+'" '+query,
 	    success: function(msg)
