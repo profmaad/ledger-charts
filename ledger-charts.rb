@@ -95,6 +95,8 @@ class LedgerCharts < Sinatra::Base
         @@next_id += 1
       end
       @@reports[id] = JSON.parse(reportJSON, :symbolize_names => true)
+      @@reports[id].delete("timeSpan")
+      @@reports[id].delete("timeStep")
       IO.write(settings.reports_dir+"/#{id}.json", JSON.pretty_generate(@@reports[id]))
 
       return  [200, id.to_s]
